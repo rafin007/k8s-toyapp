@@ -1,17 +1,17 @@
-name: build backend image
+name: build frontend image
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'backend/**'
-      - '.github/workflows/backend.yaml'
+      - 'frontend/**'
+      - '.github/workflows/frontend.yaml'
     branches:
       - main
 
 jobs:
   build:
-    name: "backend:build"
+    name: "frontend:build"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,14 +24,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v3
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: ./frontend
+          file: ./frontend/Dockerfile
           platforms: linux/arm64, linux/amd64
           push: true
-          tags: ghcr.io/rafin007/k8s-toyapp:backend-${{ github.sha }}
+          tags: ghcr.io/rafin007/k8s-toyapp:frontend-${{ github.sha }}
 
   tests:
-    name: "backend:test"
+    name: "frontend:test"
     runs-on: ubuntu-latest
     needs: [ build ]
     steps:
@@ -45,12 +45,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull and run tests
         run: |
-          docker pull ghcr.io/rafin007/k8s-toyapp:backend-${{ github.sha }}
-          docker run -d -p 8080:8080 -e APP_PORT=8080 ghcr.io/rafin007/k8s-toyapp:backend-${{ github.sha }}
+          docker pull ghcr.io/rafin007/k8s-toyapp:frontend-${{ github.sha }}
+          docker run -d -p 8000:8000 -e APP_PORT=8000 ghcr.io/rafin007/k8s-toyapp:frontend-${{ github.sha }}
           sleep 10
           curl localhost:8080/api/status
           exit $?
       - name: Push image
         run: |
-          docker tag ghcr.io/rafin007/k8s-toyapp:backend-${{ github.sha }} ghcr.io/rafin007/k8s-toyapp:backend
-          docker push ghcr.io/rafin007/k8s-toyapp:backend
+          docker tag ghcr.io/rafin007/k8s-toyapp:frontend-${{ github.sha }} ghcr.io/rafin007/k8s-toyapp:frontend
+          docker push ghcr.io/rafin007/k8s-toyapp:frontend
