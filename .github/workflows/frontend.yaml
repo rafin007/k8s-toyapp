@@ -48,7 +48,7 @@ jobs:
           docker pull ghcr.io/rafin007/k8s-toyapp:frontend-${{ github.sha }}
           docker run -d -p 8000:8000 -e APP_PORT=8000 ghcr.io/rafin007/k8s-toyapp:frontend-${{ github.sha }}
           sleep 10
-          curl localhost:3000/api/status
+          curl localhost:8000
           exit $?
       - name: Push image
         run: |
